@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import { AxiosError } from 'axios';
+	import { goto } from '$app/navigation';
 
 	let username = '';
 	let password = '';
@@ -19,6 +20,8 @@
 
 		(event.target as HTMLFormElement).reset();
 		error = '';
+
+		goto('/');
 	};
 </script>
 
