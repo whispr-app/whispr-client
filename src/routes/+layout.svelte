@@ -2,6 +2,8 @@
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import axios, { AxiosError } from 'axios';
 
+	let userShown = false;
+
 	axios.interceptors.request.use((config) => {
 		if ($authedUser) config.headers['Authorization'] = `Bearer ${$authedUser.token}`;
 		return config;
@@ -44,17 +46,24 @@
 {#if $authedUser}
 	<p>Logged in as {$authedUser.username}@{window.location.hostname}</p>
 	<button on:click={signout}>Sign out</button>
-	{#await getUser()}
-		<p>Loading...</p>
-	{:then user}
-		<p>nickname: {user.nickname}</p>
-		<p>public key:</p>
-		<pre>{$authedUser.publicKey}</pre>
-		<p>private key:</p>
-		<pre>{$authedUser.privateKey}</pre>
-	{:catch error}
-		<p>{error}</p>
-	{/await}
+	<button
+		on:click={() => {
+			userShown = !userShown;
+		}}>Show/hide user</button
+	>
+	{#if userShown}
+		{#await getUser()}
+			<p>Loading...</p>
+		{:then user}
+			<p>nickname: {user.nickname}</p>
+			<p>public key:</p>
+			<pre>{$authedUser.publicKey}</pre>
+			<p>private key:</p>
+			<pre>{$authedUser.privateKey}</pre>
+		{:catch error}
+			<p>{error}</p>
+		{/await}
+	{/if}
 {/if}
 
 {#if error}
