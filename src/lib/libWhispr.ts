@@ -47,7 +47,6 @@ export class LibWhispr {
 		const saltStringPwd = btoa(String.fromCharCode(...new Uint8Array(saltPwd)));
 		const hashedPassword = await this.pbkdf2(password, saltPwd);
 		const hashedPasswordString = (await window.crypto.subtle.exportKey('jwk', hashedPassword)).k!;
-		console.log(`${hashedPasswordString}:${saltStringPwd}`);
 
 		const { data } = await axios.post(this.constructHttpUrl('users/register'), {
 			password: `${hashedPasswordString}:${saltStringPwd}`,
@@ -67,7 +66,7 @@ export class LibWhispr {
 				...new Uint8Array(await libWhispr.encryptMessage(privateKey, prkHashedPassword, iv))
 			)
 		);
-		const response = await axios.patch(
+		await axios.patch(
 			this.constructHttpUrl('users/update-key-pair'),
 			{
 				encryptedPrivateKey: `${encryptedPrivateKey}:${saltStringPrk}:${ivString}`,
@@ -79,8 +78,6 @@ export class LibWhispr {
 				}
 			}
 		);
-
-		console.log(response);
 
 		this.authStore = {
 			token,
@@ -105,13 +102,9 @@ export class LibWhispr {
 				.map((c) => c.charCodeAt(0))
 		);
 
-		console.log(saltBuffer);
-
 		const hashedPassword = await this.pbkdf2(password, saltBuffer);
 
 		const hashedPasswordString = (await window.crypto.subtle.exportKey('jwk', hashedPassword)).k!;
-
-		console.log(`${hashedPasswordString}:${salt}`);
 
 		const response = await axios.post(this.constructHttpUrl('auth/sign-in'), {
 			username,
@@ -132,16 +125,14 @@ export class LibWhispr {
 	};
 
 	public signout = async () => {
-		console.log('signout');
-
-		this.authStore = null;
-		authedUser.set(null);
-
 		if (!this.authStore) throw new Error('Not signed in');
 
 		const response = await axios.post(this.constructHttpUrl('auth/sign-out'));
 
 		if (response.status !== 200) throw new Error('Failed to sign out');
+
+		this.authStore = null;
+		authedUser.set(null);
 	};
 
 	public getUser = async (username: string) => {
@@ -150,12 +141,153 @@ export class LibWhispr {
 		return response.data;
 	};
 
+	public getChannels = async () => {
+		const response = await axios.get(this.constructHttpUrl('users/@self/channels'));
+
+		return response.data;
+	};
+
+	public getChannel = async (channelId: string) => {
+		const response = await axios.get(this.constructHttpUrl(`channels/${channelId}`));
+
+		return response.data;
+	};
+
+	public createChannel = async (recipients: string[]) => {
+		const response = await axios.post(this.constructHttpUrl(`/users/@self/channels`), {
+			recipients
+		});
+
+		return response.data;
+	};
+
+	public fetchMessages = async (channelId: string, page: number = 1) => {
+		const response = await axios.get(
+			this.constructHttpUrl(`channels/${channelId}/messages?page=${page}`)
+		);
+
+		return response.data;
+	};
+
+	public bufferToBase64 = (buffer: ArrayBuffer) => {
+		return btoa(
+			new Uint8Array(buffer).reduce((binary, byte) => binary + String.fromCharCode(byte), '')
+		);
+	};
+
+	public base64ToBuffer = (base64: string) => {
+		return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+	};
+
+	public prepareMessage = async (
+		symmetricKey: CryptoKey,
+		privateKey: string,
+		publicKey: string,
+		content: string
+	): Promise<{
+		cipher: string;
+		encryptedSymmetricKey: string;
+	}> => {
+		const encryptedSymmetricKey = await this.encryptSymmetricKey(
+			symmetricKey,
+			publicKey,
+			privateKey
+		);
+
+		const iv = this.generateIv();
+		const ivString = btoa(String.fromCharCode(...new Uint8Array(iv)));
+		const encryptedContent = await this.encryptMessage(content, symmetricKey, iv);
+
+		const encryptedContentString = this.bufferToBase64(encryptedContent);
+
+		return {
+			cipher: `${encryptedContentString}:${ivString}`,
+			encryptedSymmetricKey
+		};
+	};
+
+	public sendMessage = async (channelId: string, content: string) => {
+		const channel = await this.getChannel(channelId);
+
+		const user = await this.getUser(
+			channel.userChannelPermissions.find(
+				(r: {
+					user: {
+						id: string;
+						username: string;
+						nickname: string;
+					};
+				}) => r.user.id !== this.authStore!.userId
+			)!.user.username
+		);
+
+		const symmetricKey = await this.generateSymmetricKey();
+
+		await axios.post(this.constructHttpUrl(`channels/${channelId}/messages`), {
+			content: [
+				{
+					target: user.id,
+					...(await this.prepareMessage(
+						symmetricKey,
+						this.authStore!.privateKey,
+						user.publicKey,
+						content
+					))
+				},
+				{
+					target: this.authStore!.userId,
+					...(await this.prepareMessage(
+						symmetricKey,
+						this.authStore!.privateKey,
+						this.authStore!.publicKey,
+						content
+					))
+				}
+			]
+		});
+	};
+
+	public decryptMessageContent = async (
+		cipher: string,
+		author: {
+			id: string;
+			username: string;
+			nickname: string;
+			keyPair: {
+				publicKey: string;
+			};
+		},
+		encryptedSymmetricKey: string
+	): Promise<string> => {
+		const [encryptedContent, iv] = cipher.split(':');
+		const symmetricKey = await this.deriveSymmetricKey(
+			encryptedSymmetricKey,
+			author.keyPair.publicKey,
+			this.authStore!.privateKey
+		);
+		const ivBuffer = new Uint8Array(
+			atob(iv)
+				.split('')
+				.map((c) => c.charCodeAt(0))
+		);
+		const decryptedContent = await libWhispr.decryptMessage(
+			encryptedContent,
+			symmetricKey,
+			ivBuffer
+		);
+		return decryptedContent;
+	};
+
+	public getSymmetricKey = async (channelId: string) => {
+		const response = await axios.get(this.constructHttpUrl(`channels/${channelId}/symmetric-key`));
+
+		return response.data;
+	};
+
 	public deriveEncryptedPrivateKey = async (
 		password: string,
 		encryptedPrivateKey: string
 	): Promise<string> => {
-		console.log(password, encryptedPrivateKey);
-
 		const [encryptedPrivateKeyString, salt, iv] = encryptedPrivateKey.split(':');
 
 		const ivBuffer = new Uint8Array(
@@ -174,8 +306,6 @@ export class LibWhispr {
 			prkHashedPassword,
 			ivBuffer
 		);
-
-		console.log(derivedPrivateKey);
 
 		return derivedPrivateKey;
 	};
@@ -311,17 +441,6 @@ export class LibWhispr {
 
 		return key;
 	};
-
-	// public prepareCredentialsForStorage = async (
-	// 	password: string
-	// 	// privateKey: string,
-	// 	// publicKey: string
-	// ) => {
-	// 	const salt = this.generateSalt();
-	// 	const passwordHash = await this.pbkdf2(password, salt);
-
-	// 	console.log('passwordHash', passwordHash);
-	// };
 }
 
 export const libWhispr = new LibWhispr('localhost:28980', {

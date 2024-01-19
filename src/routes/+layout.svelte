@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import axios, { AxiosError } from 'axios';
 
@@ -14,7 +15,7 @@
 		async (error) => {
 			console.log(error);
 
-			if (error.response?.status === 401) {
+			if (error.response?.status === 401 && !error.config.url?.includes('/auth/sign-out')) {
 				await libWhispr.signout();
 			}
 			return Promise.reject(error);
@@ -30,6 +31,8 @@
 	const signout = async () => {
 		try {
 			await libWhispr.signout();
+			goto('/');
+			window.location.reload();
 		} catch (e) {
 			if (e instanceof AxiosError) {
 				error = e.response?.data?.message || e.message;

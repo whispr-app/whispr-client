@@ -34,12 +34,10 @@ export class Gateway {
 
 		this.socket.onopen = () => {
 			this.open = true;
-			console.log('ws connected', this.uuid);
 		};
 
 		this.socket.onclose = () => {
 			this.open = false;
-			console.log('ws closed', this.uuid);
 			this.stream.unshift(
 				new MessageEvent('message', {
 					data: JSON.stringify({ ts: new Date(), d: { code: 1000, reason: 'closed' } })
@@ -68,11 +66,7 @@ export class Gateway {
 			this.stream.unshift(msg);
 			this.streamWritable.set(this.stream);
 
-			// console.log(msg);
-
 			const { op, d } = JSON.parse(msg.data);
-
-			// console.log(op, t, d, ts);
 
 			switch (op) {
 				case OpCode.Hello: {
