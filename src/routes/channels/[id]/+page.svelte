@@ -88,6 +88,7 @@
 
 	const sendMessage = async () => {
 		if (!message) return;
+		if (message.length > 2000) return;
 		await libWhispr.sendMessage(id, message);
 		message = '';
 	};
