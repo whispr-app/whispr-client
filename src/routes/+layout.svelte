@@ -18,6 +18,10 @@
 			if (error.response?.status === 401 && !error.config.url?.includes('/auth/sign-out')) {
 				await libWhispr.signout();
 			}
+			if (error.config.url?.includes('/auth/sign-out')) {
+				libWhispr.authStore = null;
+				authedUser.set(null);
+			}
 			return Promise.reject(error);
 		}
 	);
