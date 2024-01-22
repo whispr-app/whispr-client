@@ -443,7 +443,7 @@ export class LibWhispr {
 	};
 }
 
-export const libWhispr = new LibWhispr('localhost:28980', {
+export const libWhispr = new LibWhispr('whispr.cx/api', {
 	version: 'v0',
 	secure: false
 });
