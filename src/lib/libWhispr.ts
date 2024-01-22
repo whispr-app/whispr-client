@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { writable } from 'svelte/store';
 
-const url = 'whispr.cx/api';
+const url = import.meta.env.DEV ? 'localhost:28980' : 'whispr.cx/api';
 
 console.log('api url', url);
 
@@ -449,7 +449,7 @@ export class LibWhispr {
 
 export const libWhispr = new LibWhispr(url, {
 	version: 'v0',
-	secure: true
+	secure: import.meta.env.PROD
 });
 
 export const authedUser = writable<AuthStore | null>(
