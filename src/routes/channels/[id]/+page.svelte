@@ -94,6 +94,7 @@
 	};
 
 	$: {
+		messages.set([]);
 		if (mounted && id !== '@self') {
 			libWhispr.fetchMessages(id).then((response) => {
 				for (const message of response) {
