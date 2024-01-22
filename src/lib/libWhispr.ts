@@ -3,6 +3,10 @@ import axios from 'axios';
 
 import { writable } from 'svelte/store';
 
+const url = 'whispr.cx/api';
+
+console.log('api url', url);
+
 export type LibWhisprOptions = {
 	version: string;
 	secure: boolean;
@@ -443,7 +447,7 @@ export class LibWhispr {
 	};
 }
 
-export const libWhispr = new LibWhispr('whispr.cx/api', {
+export const libWhispr = new LibWhispr(url, {
 	version: 'v0',
 	secure: false
 });
