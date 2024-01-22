@@ -449,7 +449,7 @@ export class LibWhispr {
 
 export const libWhispr = new LibWhispr(url, {
 	version: 'v0',
-	secure: false
+	secure: true
 });
 
 export const authedUser = writable<AuthStore | null>(
