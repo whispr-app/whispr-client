@@ -3,8 +3,6 @@
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import axios, { AxiosError } from 'axios';
 
-	let userShown = false;
-
 	axios.interceptors.request.use((config) => {
 		if ($authedUser) config.headers['Authorization'] = `Bearer ${$authedUser.token}`;
 		return config;
@@ -26,53 +24,63 @@
 		}
 	);
 
-	let error = '';
-
-	const getUser = async () => {
-		if ($authedUser) return await libWhispr.getUser($authedUser?.username);
-	};
-
-	const signout = async () => {
-		try {
-			await libWhispr.signout();
-			goto('/');
-			window.location.reload();
-		} catch (e) {
-			if (e instanceof AxiosError) {
-				error = e.response?.data?.message || e.message;
-			}
-			return;
-		}
-	};
+	// const signout = async () => {
+	// 	try {
+	// 		await libWhispr.signout();
+	// 		goto('/');
+	// 		window.location.reload();
+	// 	} catch (e) {
+	// 		if (e instanceof AxiosError) {
+	// 			error = e.response?.data?.message || e.message;
+	// 		}
+	// 		return;
+	// 	}
+	// };
 </script>
-
-<a href="/">home</a>
 
 <slot />
 
-{#if $authedUser}
-	<p>Logged in as {$authedUser.username}@{window.location.hostname}</p>
-	<button on:click={signout}>Sign out</button>
-	<button
-		on:click={() => {
-			userShown = !userShown;
-		}}>Show/hide user</button
-	>
-	{#if userShown}
-		{#await getUser()}
-			<p>Loading...</p>
-		{:then user}
-			<p>nickname: {user.nickname}</p>
-			<p>public key:</p>
-			<pre>{$authedUser.publicKey}</pre>
-			<p>private key:</p>
-			<pre>{$authedUser.privateKey}</pre>
-		{:catch error}
-			<p>{error}</p>
-		{/await}
-	{/if}
-{/if}
+<style lang="scss">
+	@use '$lib/styles/colours.scss' as colours;
 
-{#if error}
-	<p>{error}</p>
-{/if}
+	@font-face {
+		font-family: 'Mona Sans';
+		src:
+			url('Mona-Sans.woff2') format('woff2 supports variations'),
+			url('Mona-Sans.woff2') format('woff2-variations');
+		font-weight: 200 900;
+		font-stretch: 75% 125%;
+	}
+
+	:global(html) {
+		font-family: 'Mona Sans';
+		padding: 0;
+		margin: 0;
+	}
+
+	:global(body) {
+		padding: 0;
+		margin: 0;
+		width: 100%;
+		height: 100%;
+		background-color: colours.$background-100;
+		color: colours.$text-100;
+	}
+
+	:global(a) {
+		color: colours.$primary-100;
+	}
+
+	:global(*) {
+		font-weight: 300;
+		font-stretch: 100%;
+	}
+	:global(h1) {
+		font-weight: 800;
+		font-stretch: 125%;
+	}
+	:global(h2) {
+		font-weight: 500;
+		font-stretch: 125%;
+	}
+</style>

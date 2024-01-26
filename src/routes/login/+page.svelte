@@ -36,3 +36,13 @@
 {#if error}
 	<p>{error}</p>
 {/if}
+
+<style lang="scss">
+	:global(body) {
+		background-image: url('/wave.svg');
+		background-repeat: no-repeat;
+		background-size: cover;
+		padding: 10px;
+		overflow: hidden;
+	}
+</style>
