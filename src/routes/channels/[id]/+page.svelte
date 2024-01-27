@@ -141,7 +141,17 @@
 			}
 		}
 	});
+
+	const signout = async () => {
+		try {
+			await libWhispr.signout();
+			goto('/');
+			window.location.reload();
+		} catch (e) {}
+	};
 </script>
+
+<button on:click={signout}> sign out (TEMP) </button>
 
 {#if id === '@self'}
 	<h1>Channels</h1>

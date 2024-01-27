@@ -2,42 +2,137 @@
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import { AxiosError } from 'axios';
 	import { goto } from '$app/navigation';
+	import WhisprLogoWhite from '$lib/components/whispr-logo-white.svelte';
+	import Modal from '$lib/components/structure/Modal.svelte';
+	import Input from '$lib/components/Input.svelte';
+	import LoadingDots from '$lib/components/LoadingDots.svelte';
+
+	if ($authedUser) {
+		goto('/channels/@self');
+	}
 
 	let username = '';
 	let password = '';
-	let error = '';
 
-	const signin = async (event: Event) => {
-		if (!username || !password) return;
-		try {
-			await libWhispr.signin(username, password);
-		} catch (e) {
-			if (e instanceof AxiosError) {
-				error = e.response?.data?.message || e.message;
-			}
+	let debounce = false;
+	let errorMessage = '';
+
+	let usernameError = '';
+	let passwordError = '';
+
+	const signin = async (e: Event) => {
+		debounce = true;
+		usernameError = '';
+		passwordError = '';
+
+		let canSubmit = true;
+		if (!username) {
+			usernameError = 'Username is required';
+			e.preventDefault();
+			canSubmit = false;
+		}
+		if (!password) {
+			passwordError = 'Password is required';
+			e.preventDefault();
+			canSubmit = false;
+		}
+		if (!canSubmit) {
+			debounce = false;
 			return;
 		}
+		try {
+			const response = await libWhispr.signin(username, password);
 
-		(event.target as HTMLFormElement).reset();
-		error = '';
+			if (response.status !== 200) {
+				if (response.data.message) {
+					usernameError = response.data.message;
+				}
+				debounce = false;
+				return;
+			}
 
-		goto('/');
+			debounce = false;
+
+			goto('/channels/@self');
+			(e.target as HTMLFormElement).reset();
+		} catch (e) {
+			if (e instanceof AxiosError) {
+				if (e.code === 'ECONNABORTED') {
+					errorMessage = 'Request timed out';
+				} else if (e.code === 'ERR_NETWORK') {
+					errorMessage = 'Network error. Try again later';
+				}
+				if (e.response?.data?.message) {
+					switch (e.response.data.message) {
+						case 'Specified user was not found.':
+						case 'User not found': {
+							usernameError = e.response.data.message;
+							break;
+						}
+						case 'Incorrect password': {
+							passwordError = e.response.data.message;
+							break;
+						}
+						default: {
+							errorMessage = e.response.data.message;
+							break;
+						}
+					}
+				}
+			}
+			debounce = false;
+			return;
+		}
 	};
 </script>
 
-<form on:submit|preventDefault={signin}>
-	<label for="username">Username</label>
-	<input type="text" id="username" bind:value={username} />
-	<label for="password">Password</label>
-	<input type="password" id="password" bind:value={password} />
-	<button type="submit">Sign in</button>
-</form>
-
-{#if error}
-	<p>{error}</p>
-{/if}
+<main>
+	<div class="logo">
+		<WhisprLogoWhite />
+	</div>
+	<Modal>
+		<form on:submit|preventDefault={signin}>
+			<h1>Log in</h1>
+			{#if errorMessage}
+				<p class="error-message">{errorMessage}</p>
+			{/if}
+			<Input
+				type="username"
+				placeholder="Username"
+				bind:value={username}
+				highlightError={!!usernameError}
+				errorMessage={usernameError}
+				change={() => {
+					usernameError = '';
+					if (username === '') {
+						usernameError = 'Username must not be empty';
+					}
+				}}
+				domain={window.location.hostname}><i class="bi bi-type icon"></i></Input
+			>
+			<Input
+				type="password"
+				placeholder="Password"
+				bind:value={password}
+				highlightError={!!passwordError}
+				errorMessage={passwordError}><i class="bi bi-key icon"></i></Input
+			>
+			<button disabled={debounce} type="submit">
+				{#if debounce}
+					<LoadingDots />
+				{:else}
+					Log in
+				{/if}
+			</button>
+			<p>Don't have an account?</p>
+			<a href="/register">Register</a>
+		</form>
+	</Modal>
+</main>
 
 <style lang="scss">
+	@use '$lib/styles/colours' as colours;
+
 	h1,
 	p,
 	a {
@@ -53,5 +148,37 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+	}
+
+	button {
+		width: 100%;
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+		* {
+			text-align: center;
+		}
+	}
+
+	.error-message {
+		color: colours.$error-100;
+		margin: 0;
+		margin-bottom: 0.5rem;
+		position: relative;
+		top: 0px;
+		width: 100%;
+		max-width: 418px;
+	}
+
+	.logo {
+		width: 150px;
+		position: absolute;
+		bottom: 0;
+		left: 10px;
 	}
 </style>

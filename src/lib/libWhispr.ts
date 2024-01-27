@@ -128,6 +128,8 @@ export class LibWhispr {
 		};
 
 		authedUser.set(this.authStore);
+
+		return response;
 	};
 
 	public signout = async () => {
