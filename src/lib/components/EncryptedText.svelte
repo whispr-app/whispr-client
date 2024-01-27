@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let length = 10;
+	export let length = 30;
 
 	const generateRandomString = (length: number): string => {
 		const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -23,3 +23,10 @@
 <p>
 	{randomString}
 </p>
+
+<style lang="scss">
+	p {
+		width: 200px;
+		overflow-x: hidden;
+	}
+</style>
