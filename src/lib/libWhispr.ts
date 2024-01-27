@@ -52,12 +52,12 @@ export class LibWhispr {
 		const hashedPassword = await this.pbkdf2(password, saltPwd);
 		const hashedPasswordString = (await window.crypto.subtle.exportKey('jwk', hashedPassword)).k!;
 
-		const { data } = await axios.post(this.constructHttpUrl('users/register'), {
+		const response = await axios.post(this.constructHttpUrl('users/register'), {
 			password: `${hashedPasswordString}:${saltStringPwd}`,
 			nickname,
 			username
 		});
-		const { token, id } = data;
+		const { token, id } = response.data;
 
 		const { privateKey, publicKey } = await this.generateAsymmetricKeyPair(id);
 		const saltPrk = this.generateSalt();
@@ -91,6 +91,8 @@ export class LibWhispr {
 			publicKey
 		};
 		authedUser.set(this.authStore);
+
+		return response;
 	};
 
 	public signin = async (username: string, password: string) => {

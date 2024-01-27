@@ -42,6 +42,7 @@
 
 <style lang="scss">
 	@use '$lib/styles/colours.scss' as colours;
+	@import url('https://fonts.nexus/css?display=swap&family=Bootstrap+Icons');
 
 	@font-face {
 		font-family: 'Mona Sans';
@@ -82,5 +83,47 @@
 	:global(h2) {
 		font-weight: 500;
 		font-stretch: 125%;
+	}
+
+	:global(.icon) {
+		scale: 1.5;
+		width: 100%;
+		height: 100%;
+		display: inline-block;
+		// justify-content: center;
+		// align-items: center;
+		// text-align: center;
+		vertical-align: middle;
+
+		&::before {
+			vertical-align: -5px;
+		}
+	}
+
+	:global(button) {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0.5rem;
+
+		font-size: large;
+		width: fit-content;
+
+		background-color: colours.$button-100;
+		color: colours.$text-100;
+		border-radius: 8px;
+		border: 1px solid colours.$outline-100;
+
+		transition: border 0.2s ease-in-out;
+
+		&:hover {
+			border: 1px solid colours.$outline-highlighted-100;
+			cursor: pointer;
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
 	}
 </style>

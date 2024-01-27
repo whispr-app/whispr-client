@@ -38,11 +38,20 @@
 {/if}
 
 <style lang="scss">
-	:global(body) {
+	h1,
+	p,
+	a {
+		margin: 0;
+	}
+	main {
+		width: 100vw;
+		height: 100vh;
 		background-image: url('/wave.svg');
 		background-repeat: no-repeat;
 		background-size: cover;
-		padding: 10px;
 		overflow: hidden;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 </style>
