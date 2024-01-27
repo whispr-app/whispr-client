@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import WhisprLogoWhite from '$lib/components/whispr-logo-white.svelte';
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import axios, { AxiosError } from 'axios';
 
@@ -37,6 +38,14 @@
 	// 	}
 	// };
 </script>
+
+<div class="no-mobile">
+	<div>
+		<WhisprLogoWhite />
+	</div>
+	<h1>Mobile currently isn't supported.</h1>
+	<h2>Feel free to have a look on a desktop.</h2>
+</div>
 
 <slot />
 
@@ -97,6 +106,38 @@
 
 		&::before {
 			vertical-align: -5px;
+		}
+	}
+
+	.no-mobile {
+		z-index: 1000000;
+		position: fixed;
+		top: 0;
+		left: 0;
+		display: block;
+		width: 100vw;
+		height: 100vh;
+		background-image: url('/wave.svg');
+		background-size: cover;
+		background-color: colours.$background-100;
+		background-repeat: no-repeat;
+		padding: 2rem;
+
+		h1 {
+			word-break: break-word;
+			font-size: 2rem;
+			padding: 0;
+			margin: 0;
+		}
+
+		* {
+			max-width: 300px;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.no-mobile {
+			display: none !important;
 		}
 	}
 
