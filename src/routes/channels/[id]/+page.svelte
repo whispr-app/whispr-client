@@ -151,6 +151,25 @@
 	};
 </script>
 
+<svelte:head>
+	{#if id === '@self'}
+		<title>Channels - Whispr</title>
+	{:else}
+		{#await libWhispr.getChannel(id)}
+			<title>Channel - Whispr</title>
+		{:then channel}
+			<title>
+				{channel.userChannelPermissions.length === 2
+					? getNameFromUsers(channel.userChannelPermissions)
+					: channel.name}{' '}
+				- Whispr
+			</title>
+		{:catch}
+			<title>Channel - Whispr</title>
+		{/await}
+	{/if}
+</svelte:head>
+
 <button on:click={signout}> sign out (TEMP) </button>
 
 {#if id === '@self'}

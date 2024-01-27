@@ -86,6 +86,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Login - Whispr</title>
+</svelte:head>
+
 <main>
 	<div class="logo">
 		<WhisprLogoWhite />

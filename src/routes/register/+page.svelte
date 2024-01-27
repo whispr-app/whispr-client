@@ -115,6 +115,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Register - Whispr</title>
+</svelte:head>
+
 <main>
 	<div class="logo">
 		<WhisprLogoWhite />

@@ -8,6 +8,10 @@
 	import Footer from '$lib/components/Footer.svelte';
 </script>
 
+<svelte:head>
+	<title>Home - Whispr</title>
+</svelte:head>
+
 <Header />
 <section>
 	<h1>Privacy that just <GradientText>makes sense.</GradientText></h1>
