@@ -84,6 +84,8 @@
 	:global(*) {
 		font-weight: 300;
 		font-stretch: 100%;
+		scrollbar-color: colours.$text-secondary-100 colours.$background-0;
+		scrollbar-width: thin;
 	}
 	:global(h1) {
 		font-weight: 800;

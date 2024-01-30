@@ -169,6 +169,14 @@ export class LibWhispr {
 		return response.data;
 	};
 
+	public getMessage = async (channelId: string, messageId: string) => {
+		const response = await axios.get(
+			this.constructHttpUrl(`channels/${channelId}/messages/${messageId}`)
+		);
+
+		return response.data;
+	};
+
 	public fetchMessages = async (channelId: string, page: number = 1) => {
 		const response = await axios.get(
 			this.constructHttpUrl(`channels/${channelId}/messages?page=${page}`)

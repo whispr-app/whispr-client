@@ -4,6 +4,7 @@
 	export let value: string;
 	export let domain = '';
 	export let style = '';
+	export let autocomplete = 'true';
 	export let highlightError = false;
 	export let errorMessage = '';
 
@@ -38,7 +39,15 @@
 				<slot />
 			</div>
 		{/if}
-		<input {id} use:typeAction {placeholder} bind:value on:change={change} on:input={input} />
+		<input
+			{autocomplete}
+			{id}
+			use:typeAction
+			{placeholder}
+			bind:value
+			on:change={change}
+			on:input={input}
+		/>
 		{#if type === 'username' && domain}
 			<span class="domain">@{domain}</span>
 		{:else if type === 'password'}

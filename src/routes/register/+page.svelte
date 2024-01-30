@@ -7,9 +7,9 @@
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import { AxiosError } from 'axios';
 
-	if ($authedUser) {
-		goto('/channels/@self');
-	}
+	// if ($authedUser) {
+	// 	goto('/channels/@self');
+	// }
 
 	const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
 

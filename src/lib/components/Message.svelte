@@ -35,7 +35,9 @@
 				<img class="profile" src={url} alt="Profile" />
 			{/await}
 		{/if}
-		<slot />
+		<div class="messages">
+			<slot />
+		</div>
 		{#if groupMessage === true && sentByMe === false}
 			<p class="username">{username || 'Username'}</p>
 			<p class="separator">•</p>
@@ -118,6 +120,12 @@
 		background-color: colours.$background-tertiary-100;
 		border: 1px solid colours.$outline-100;
 		border-radius: 15px;
+	}
+
+	.messages {
+		display: flex;
+		flex-direction: column-reverse;
+		margin: 10px;
 	}
 
 	.message {
