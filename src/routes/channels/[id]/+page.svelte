@@ -84,7 +84,6 @@
 	$: {
 		_channels.length = 0;
 		channels.set(_channels);
-		console.log(_channels);
 		libWhispr.getChannels().then((response) => {
 			for (const channel of response) {
 				_channels.push(channel);
@@ -130,10 +129,6 @@
 		_messages.length = 0;
 		messages.set(_messages);
 
-		console.log(_messages.length === 0);
-
-		console.log('changing channel');
-
 		if (mounted && id !== '@self') {
 			libWhispr.fetchMessages(id).then(async (response) => {
 				for (const msg of response) {
@@ -145,14 +140,7 @@
 
 					msg.content = content;
 
-					console.log(content, msg.author.username);
-
 					const lastMessageCluster = _messages[_messages.length - 1];
-					console.log(
-						JSON.stringify(
-							lastMessageCluster?.map((msg) => `${msg.author.username}: ${msg.content}`)
-						)
-					);
 
 					if (lastMessageCluster && lastMessageCluster[0].author.id === msg.author.id) {
 						lastMessageCluster.push(msg);
@@ -160,7 +148,6 @@
 						_messages.push([msg]);
 					}
 				}
-				console.log(_messages);
 				messages.set(_messages);
 			});
 		}
@@ -172,8 +159,6 @@
 		const message = msgs[0];
 
 		const parsed = JSON.parse(message.data);
-
-		// console.log(parsed);
 
 		if (parsed.op === OpCode.Notification) {
 			switch (parsed.t) {
@@ -321,7 +306,7 @@
 				<a href="/channels/{channel.id}">
 					<div>
 						<div class="name-and-time">
-							<h2>
+							<h2 class="name">
 								{channel.userChannelPermissions.length === 2
 									? getUserFromUsers(channel.userChannelPermissions)?.nickname
 									: channel.name}
@@ -657,14 +642,19 @@
 
 						h2 {
 							margin: 0;
+						}
+
+						.name {
 							max-width: 300px;
-							overflow-y: hidden;
+							overflow: hidden;
 							text-overflow: ellipsis;
 						}
 
 						.time {
 							color: colours.$text-secondary-100;
 							width: 100px;
+							right: 0;
+							text-align: right;
 						}
 					}
 				}
