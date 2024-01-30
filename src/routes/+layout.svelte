@@ -14,7 +14,11 @@
 		async (error) => {
 			console.log(error);
 
-			if (error.response?.status === 401 && !error.config.url?.includes('/auth/sign-out')) {
+			if (
+				error.response?.status === 401 &&
+				!error.config.url?.includes('/auth/sign-out') &&
+				!error.config.url?.includes('/channels/')
+			) {
 				await libWhispr.signout();
 			}
 			if (error.config.url?.includes('/auth/sign-out')) {

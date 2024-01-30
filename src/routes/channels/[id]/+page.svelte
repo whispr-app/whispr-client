@@ -15,7 +15,7 @@
 	const emojiRegex = /^[\p{Emoji}]+$/u;
 
 	if (!$authedUser) {
-		goto('/login');
+		goto(`/login?returnTo=${window.location.pathname}`);
 	}
 
 	export let data;

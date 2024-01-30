@@ -6,9 +6,12 @@
 	import Modal from '$lib/components/structure/Modal.svelte';
 	import Input from '$lib/components/Input.svelte';
 	import LoadingDots from '$lib/components/LoadingDots.svelte';
+	import { page } from '$app/stores';
+
+	const returnTo = $page.url.searchParams.get('returnTo') || '/channels/@self';
 
 	if ($authedUser) {
-		goto('/channels/@self');
+		goto(returnTo);
 	}
 
 	let username = '';
@@ -53,7 +56,7 @@
 
 			debounce = false;
 
-			goto('/channels/@self');
+			goto(returnTo);
 			(e.target as HTMLFormElement).reset();
 		} catch (e) {
 			if (e instanceof AxiosError) {
