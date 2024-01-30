@@ -664,6 +664,7 @@
 
 						.time {
 							color: colours.$text-secondary-100;
+							width: 100px;
 						}
 					}
 				}
