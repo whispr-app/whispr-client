@@ -131,7 +131,7 @@
 
 		if (mounted && id !== '@self') {
 			libWhispr.fetchMessages(id).then(async (response) => {
-				for (const msg of response) {
+				for (const msg of response.reverse()) {
 					const content = await libWhispr.decryptMessageContent(
 						msg.content.cipherText,
 						msg.author,
@@ -140,12 +140,18 @@
 
 					msg.content = content;
 
-					const lastMessageCluster = _messages[_messages.length - 1];
+					const lastMessageCluster = _messages[0];
 
-					if (lastMessageCluster && lastMessageCluster[0].author.id === msg.author.id) {
-						lastMessageCluster.push(msg);
+					if (
+						lastMessageCluster &&
+						lastMessageCluster[0].author.id === msg.author.id &&
+						new Date(msg.createdAt).getTime() -
+							new Date(lastMessageCluster[0].createdAt).getTime() <
+							300000
+					) {
+						lastMessageCluster.unshift(msg);
 					} else {
-						_messages.push([msg]);
+						_messages.unshift([msg]);
 					}
 				}
 				messages.set(_messages);
@@ -181,9 +187,16 @@
 					const message = parsed.d as Message;
 
 					if (message.channelId === id) {
-						const lastMessage = _messages[0];
-						if (lastMessage && lastMessage[0].author.id === message.author.id) {
-							lastMessage.unshift(message);
+						const lastMessageCluster = _messages[0];
+
+						if (
+							lastMessageCluster &&
+							lastMessageCluster[0].author.id === message.author.id &&
+							new Date(message.createdAt).getTime() -
+								new Date(lastMessageCluster[0].createdAt).getTime() <
+								300000
+						) {
+							lastMessageCluster.unshift(message);
 						} else {
 							_messages.unshift([message]);
 						}
