@@ -657,6 +657,9 @@
 
 						h2 {
 							margin: 0;
+							max-width: 300px;
+							overflow-y: hidden;
+							text-overflow: ellipsis;
 						}
 
 						.time {
