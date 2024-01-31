@@ -1,6 +1,7 @@
 import { writable, type Writable } from 'svelte/store';
 import { OpCode } from './gatewayTypes';
 import { libWhispr } from './libWhispr';
+import { browser } from '$app/environment';
 
 const baseReconnectionSeconds = 5;
 
@@ -30,13 +31,16 @@ export class Gateway {
 			this.socket = null;
 			this.uuid = '';
 		}
-		this.socket = new WebSocket(libWhispr.constructWsUrl(`gateway/${libWhispr.authStore?.token}`));
+		this.socket =
+			(browser &&
+				new WebSocket(libWhispr.constructWsUrl(`gateway/${libWhispr.authStore?.token}`))) ||
+			null;
 
-		this.socket.onopen = () => {
+		this.socket!.onopen = () => {
 			this.open = true;
 		};
 
-		this.socket.onclose = () => {
+		this.socket!.onclose = () => {
 			this.open = false;
 			this.stream.unshift(
 				new MessageEvent('message', {
@@ -60,7 +64,7 @@ export class Gateway {
 			// }, baseReconnectionSeconds + this.reconnectionAttemptSeconds);
 		};
 
-		this.socket.onmessage = async (msg) => {
+		this.socket!.onmessage = async (msg) => {
 			if (!this.socket) return;
 
 			this.stream.unshift(msg);

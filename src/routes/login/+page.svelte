@@ -7,11 +7,12 @@
 	import Input from '$lib/components/Input.svelte';
 	import LoadingDots from '$lib/components/LoadingDots.svelte';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 
-	const returnTo = $page.url.searchParams.get('returnTo') || '/channels/@self';
+	const returnTo = (browser && $page.url.searchParams.get('returnTo')) || '/channels/@self';
 
 	if ($authedUser) {
-		goto(returnTo);
+		browser && goto(returnTo);
 	}
 
 	let username = '';
@@ -115,7 +116,7 @@
 						usernameError = 'Username must not be empty';
 					}
 				}}
-				domain={window.location.hostname}><i class="bi bi-type icon"></i></Input
+				domain={(browser && window.location.hostname) || ''}><i class="bi bi-type icon"></i></Input
 			>
 			<Input
 				type="password"

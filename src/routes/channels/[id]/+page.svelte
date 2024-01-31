@@ -3,6 +3,7 @@
 	import { libWhispr, authedUser } from '$lib/libWhispr.js';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { gateway } from '$lib/gateway';
 	import { onDestroy, onMount } from 'svelte';
 	import { writable, type Writable } from 'svelte/store';
@@ -16,7 +17,7 @@
 		/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
 
 	if (!$authedUser) {
-		goto(`/login?returnTo=${window.location.pathname}`);
+		browser && goto(`/login?returnTo=${window.location.pathname}`);
 	}
 
 	export let data;
@@ -224,8 +225,8 @@
 	const signout = async () => {
 		try {
 			await libWhispr.signout();
-			goto('/');
-			window.location.reload();
+			browser && goto('/');
+			browser && window.location.reload();
 		} catch (e) {}
 	};
 
@@ -363,7 +364,7 @@
 							channel.userChannelPermissions.length === 2
 								? getUserFromUsers(channel.userChannelPermissions)?.username
 								: channel.name
-						}@${window.location.hostname}`}
+						}@${(browser && window.location.hostname) || ''}`}
 					</h3>
 				{/await}
 			{/if}

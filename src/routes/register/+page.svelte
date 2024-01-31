@@ -6,10 +6,11 @@
 	import LoadingDots from '$lib/components/LoadingDots.svelte';
 	import { libWhispr, authedUser } from '$lib/libWhispr';
 	import { AxiosError } from 'axios';
+	import { browser } from '$app/environment';
 
-	// if ($authedUser) {
-	// 	goto('/channels/@self');
-	// }
+	if ($authedUser) {
+		browser && goto('/channels/@self');
+	}
 
 	const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
 
@@ -145,7 +146,7 @@
 							'Username must be between 3 and 20 characters and contain only letters, numbers, underscores and hyphens';
 					}
 				}}
-				domain={window.location.hostname}><i class="bi bi-type icon"></i></Input
+				domain={(browser && window.location.hostname) || ''}><i class="bi bi-type icon"></i></Input
 			>
 			<Input
 				type="password"

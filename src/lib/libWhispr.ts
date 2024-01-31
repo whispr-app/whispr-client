@@ -2,6 +2,7 @@ import * as openpgp from 'openpgp';
 import axios from 'axios';
 
 import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
 
 const url = import.meta.env.DEV ? 'localhost:28980' : 'whispr.cx/api';
 
@@ -23,7 +24,9 @@ export type AuthStore = {
 export class LibWhispr {
 	private connectionUrl: string;
 	private options: LibWhisprOptions;
-	public authStore: AuthStore | null = JSON.parse(localStorage.getItem('authedUser') || 'null');
+	public authStore: AuthStore | null = JSON.parse(
+		(browser && localStorage.getItem('authedUser')) || 'null'
+	);
 
 	constructor(connectionUrl: string, options: LibWhisprOptions) {
 		this.connectionUrl = connectionUrl;
@@ -465,9 +468,9 @@ export const libWhispr = new LibWhispr(url, {
 });
 
 export const authedUser = writable<AuthStore | null>(
-	JSON.parse(localStorage.getItem('authedUser') || 'null')
+	JSON.parse((browser && localStorage.getItem('authedUser')) || 'null')
 );
 
 authedUser.subscribe((value) => {
-	localStorage.setItem('authedUser', JSON.stringify(value));
+	browser && localStorage.setItem('authedUser', JSON.stringify(value));
 });

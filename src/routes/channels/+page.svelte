@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { authedUser } from '$lib/libWhispr.js';
+	import { browser } from '$app/environment';
 
 	if ($authedUser) {
-		goto('/channels/@self');
+		browser && goto('/channels/@self');
 	} else {
-		goto('/login');
+		browser && goto('/login');
 	}
 </script>
